@@ -25,7 +25,6 @@
     },
     {
       "name": "@yutaro-sakamoto/projen-cdk",
-      "version": "v0.0.13",
       "type": "build"
     },
     {
@@ -83,6 +82,10 @@
     {
       "name": "constructs",
       "version": "^10.0.5",
+      "type": "runtime"
+    },
+    {
+      "name": "dotenv",
       "type": "runtime"
     }
   ],
