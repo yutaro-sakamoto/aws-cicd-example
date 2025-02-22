@@ -15,7 +15,7 @@ export class MyStack extends Stack {
       pipelineName: 'ExamplePipeline',
       synth: new ShellStep('Synth', {
         input: CodePipelineSource.gitHub('yutaro-sakamoto/aws-cicd-example', 'main'),
-        commands: ['yarn install', 'yarn run build', 'yarn cdk synth'],
+        commands: ['yarn install --check-files', 'yarn run build', 'yarn cdk synth'],
       }),
     });
 
