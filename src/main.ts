@@ -1,10 +1,9 @@
 import { App, Stack, StackProps } from 'aws-cdk-lib';
+import { CodePipeline, CodePipelineSource, ShellStep, ManualApprovalStep } from 'aws-cdk-lib/pipelines';
 import { Construct } from 'constructs';
-import { CodePipeline, CodePipelineSource, ShellStep } from 'aws-cdk-lib/pipelines';
+import * as dotenv from 'dotenv';
 import { PipelineAppStage } from './pipeline-app-stage';
 
-import * as dotenv from 'dotenv';
-import { ManualApprovalStep } from 'aws-cdk-lib/pipelines';
 
 dotenv.config();
 
@@ -16,7 +15,7 @@ export class MyStack extends Stack {
       pipelineName: 'ExamplePipeline',
       synth: new ShellStep('Synth', {
         input: CodePipelineSource.gitHub('yutaro-sakamoto/aws-cicd-example', 'main'),
-        commands: ['npm ci', 'npm run build', 'npx cdk synth'],
+        commands: ['yarn install', 'yarn run build', 'yarn cdk synth'],
       }),
     });
 
