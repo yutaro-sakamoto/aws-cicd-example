@@ -15,7 +15,13 @@ export class MyStack extends Stack {
       pipelineName: 'ExamplePipeline',
       synth: new ShellStep('Synth', {
         input: CodePipelineSource.gitHub('yutaro-sakamoto/aws-cicd-example', 'main'),
-        commands: ['yarn install --check-files', 'yarn run build', 'yarn cdk synth'],
+        commands: [
+          'echo @yutaro-sakamoto:registry=https://npm.pkg.github.com >> ~/.npmrc',
+          'echo //npm.pkg.github.com/:_authToken=$(aws ssm get-parameter --name "/cdk/github/npm-auth-token" --with-decryption --query "Parameter.Value" --output text) >> ~/.npmrc',
+          'yarn install --check-files',
+          'yarn run build',
+          'yarn cdk synth'
+        ],
       }),
     });
 
