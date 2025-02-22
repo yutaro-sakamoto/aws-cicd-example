@@ -3,6 +3,7 @@ import { CodePipeline, CodePipelineSource, ShellStep, ManualApprovalStep } from 
 import { Construct } from 'constructs';
 import * as dotenv from 'dotenv';
 import { PipelineAppStage } from './pipeline-app-stage';
+import * as iam from 'aws-cdk-lib/aws-iam';
 
 
 dotenv.config();
@@ -30,6 +31,13 @@ export class MyStack extends Stack {
     }));
 
     testingStage.addPost(new ManualApprovalStep('approval'));
+
+    pipeline.buildPipeline();
+
+    pipeline.pipeline.addToRolePolicy(new iam.PolicyStatement({
+      actions: ['ssm:GetParameter'],
+      resources: ['*'],
+    }));
   }
 }
 
