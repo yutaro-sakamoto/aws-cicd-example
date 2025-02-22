@@ -1,5 +1,5 @@
 import { App, Stack, StackProps } from 'aws-cdk-lib';
-import { CodePipeline, CodePipelineSource, ShellStep, ManualApprovalStep } from 'aws-cdk-lib/pipelines';
+import { CodePipeline, CodePipelineSource, CodeBuildStep, ManualApprovalStep } from 'aws-cdk-lib/pipelines';
 import { Construct } from 'constructs';
 import * as dotenv from 'dotenv';
 import { PipelineAppStage } from './pipeline-app-stage';
@@ -12,18 +12,20 @@ export class MyStack extends Stack {
   constructor(scope: Construct, id: string, props: StackProps) {
     super(scope, id, props);
 
+    const synthStep = new CodeBuildStep('Synth', {
+      input: CodePipelineSource.gitHub('yutaro-sakamoto/aws-cicd-example', 'main'),
+      commands: [
+        'echo @yutaro-sakamoto:registry=https://npm.pkg.github.com >> ~/.npmrc',
+        'echo //npm.pkg.github.com/:_authToken=$(aws ssm get-parameter --name "/cdk/github/npm-auth-token" --with-decryption --query "Parameter.Value" --output text) >> ~/.npmrc',
+        'yarn install --check-files',
+        'yarn run build',
+        'yarn cdk synth'
+      ],
+    });
+
     const pipeline = new CodePipeline(this, 'Pipeline', {
       pipelineName: 'ExamplePipeline',
-      synth: new ShellStep('Synth', {
-        input: CodePipelineSource.gitHub('yutaro-sakamoto/aws-cicd-example', 'main'),
-        commands: [
-          'echo @yutaro-sakamoto:registry=https://npm.pkg.github.com >> ~/.npmrc',
-          'echo //npm.pkg.github.com/:_authToken=$(aws ssm get-parameter --name "/cdk/github/npm-auth-token" --with-decryption --query "Parameter.Value" --output text) >> ~/.npmrc',
-          'yarn install --check-files',
-          'yarn run build',
-          'yarn cdk synth'
-        ],
-      }),
+      synth: synthStep,
     });
 
     const testingStage = pipeline.addStage(new PipelineAppStage(this, 'test', {
@@ -34,7 +36,7 @@ export class MyStack extends Stack {
 
     pipeline.buildPipeline();
 
-    pipeline.pipeline.addToRolePolicy(new iam.PolicyStatement({
+    synthStep.grantPrincipal.addToPrincipalPolicy(new iam.PolicyStatement({
       actions: ['ssm:GetParameter'],
       resources: ['*'],
     }));
