@@ -1,5 +1,6 @@
 import { App, Stack, StackProps } from 'aws-cdk-lib';
 import { CodePipeline, CodePipelineSource, CodeBuildStep } from 'aws-cdk-lib/pipelines';
+import { PipelineAppStage } from './pipeline-app-stage';
 import { Construct } from 'constructs';
 import * as dotenv from 'dotenv';
 import * as iam from 'aws-cdk-lib/aws-iam';
@@ -26,6 +27,10 @@ export class MyStack extends Stack {
       pipelineName: 'ExamplePipeline',
       synth: synthStep,
     });
+
+    pipeline.addStage(new PipelineAppStage(this, 'test', {
+      env: props.env,
+    }));
 
     pipeline.buildPipeline();
 
